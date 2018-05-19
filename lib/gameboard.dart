@@ -31,6 +31,7 @@ class GameBoardState extends State<GameBoard> {
   GameBoardState(int rows, int columns, Map<FourPlayer, Player> players )  {
     _players = players;
     _game = FourInAVector(rows, columns);
+    // _game.preloadState();
     nextTurn();
   }
 

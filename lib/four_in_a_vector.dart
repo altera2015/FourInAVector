@@ -76,6 +76,20 @@ class FourInAVector {
     cellDecorations.fillRange(0, cellDecorations.length, null);
   }
 
+  /*
+  void preloadState() {
+
+    pieces = [
+      null, null, null, null, null, null,null,
+      null, null, null, null, null, null,null,
+      null,              null,           null,           null,           FourPlayer.RED   , null,              null,
+      null,              null,           null,           null,           FourPlayer.YELLOW, null,              null,
+      null,              null,           FourPlayer.RED, FourPlayer.RED, FourPlayer.YELLOW, FourPlayer.YELLOW, null,
+      FourPlayer.YELLOW, FourPlayer.RED, FourPlayer.RED, FourPlayer.RED, FourPlayer.YELLOW, FourPlayer.YELLOW, null,
+      ];
+
+  }*/
+
   // returns the status of a cell.
   FourPlayer cellState( int row, int column ) {
     if ( row < 0 || row >= rows ) {

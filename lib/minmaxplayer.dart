@@ -38,12 +38,13 @@ class ScoringFourInAVector extends FourInAVector {
 
     for (int column=0;column<columns;column++){
       for (int row=0;row<rows;row++) {
-        directions.forEach((direction) {
 
-          FourPlayer rootNode = cellState(row, column);
-          if ( rootNode == null ) {
-            return;
-          }
+        FourPlayer rootNode = cellState(row, column);
+        if ( rootNode == null ) {
+          continue;
+        }
+
+        directions.forEach((direction) {
 
           int count = _countInARow(row, column, direction.rowInc, direction.colInc);
 
@@ -63,10 +64,16 @@ class ScoringFourInAVector extends FourInAVector {
 
 }
 
-// Classis Min Max algorithm with Alpha Beta pruning and recursion limits.
+// Classic Min Max algorithm with Alpha Beta pruning and recursion limits.
 class MinMaxPlayer extends Player {
 
   int _maxRecursion;
+
+  // we needed a number that is big enough to not occur by additions
+  // on the board but small enough so that we can subtract single digits.
+  // that way we can select a winning outcome based on lowest recursion.
+  static const double BIG_POSITIVE = 1e10;
+  static const double BIG_NEGATIVE = -1e10;
 
   MinMaxPlayer(FourPlayer player, int maxRecursion) : super(player) {
     _maxRecursion = maxRecursion;
@@ -82,12 +89,12 @@ class MinMaxPlayer extends Player {
     if ( game.winner == player ) {
 
       // 'we' won.
-      return double.infinity;
+      return BIG_POSITIVE;
 
     } else if ( game.winner != null ) {
 
       // other player won.
-      return double.negativeInfinity;
+      return BIG_NEGATIVE;
     }
 
     // it's a tie!
@@ -97,14 +104,12 @@ class MinMaxPlayer extends Player {
 
   double maxValue( ScoringFourInAVector game, double alpha, double beta, int recursionLevel ) {
 
-
     if ( game.state == null ) {
-      return terminalScore(game);
+      return terminalScore(game) + recursionLevel;
     }
     if ( recursionLevel >= _maxRecursion ) {
       return game.score(player);
     }
-
 
     double v = double.negativeInfinity;
     for (int column=0;column<game.columns;column++){
@@ -125,7 +130,7 @@ class MinMaxPlayer extends Player {
   double minValue( ScoringFourInAVector game, double alpha, double beta, int recursionLevel ) {
 
     if ( game.state == null ) {
-      return terminalScore(game);
+      return terminalScore(game) - recursionLevel;
     }
     if ( recursionLevel >= _maxRecursion ) {
       return game.score(player);
@@ -161,7 +166,6 @@ class MinMaxPlayer extends Player {
         nextState.dropPiece(column);
 
         double v = minValue(nextState, double.negativeInfinity, double.infinity, 1);
-
         if ( maxColumn==-1 || v > maxValue ) {
           maxColumn = column;
           maxValue = v;
