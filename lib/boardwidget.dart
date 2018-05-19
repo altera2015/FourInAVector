@@ -4,6 +4,7 @@ import 'dart:math';
 import 'four_in_a_vector.dart';
 import 'player.dart';
 import 'dart:async';
+import 'dart:ui';
 
 const Color FrameColor = Color(0xff416ff1);
 const Color FrameHighlightColor = Color(0xff33ff33);
@@ -34,7 +35,10 @@ class BoardPainter extends CustomPainter {
   Color frameEdgeColor = FrameColorEdges;
   Color frameHighlight = FrameHighlightColor;
   Color chipColor = RedChipColor;
-
+  var _frameCache;
+  Size  _frameCacheSize = Size(0.0, 0.0);
+  int _frameStateCount;
+  
   List<Rect> columnRects;
 
   BoardPainter( this.rows, this.columns, this.game, this.dropChip ) {
@@ -122,9 +126,77 @@ class BoardPainter extends CustomPainter {
     }
   }
 
+
+  // turns out drawing this whole board during the chip
+  // drop animation is too slow. So only redraw the board
+  // onto an internal image if the state has changed,
+  // otherwise just keep what we have and copy it to
+  // the active canvas. Nice speedup.
+  void _buildFrame( Size size ) {
+
+    PictureRecorder recorder = PictureRecorder();
+    Offset o = Offset(0.0,0.0);
+    Rect cull = o & size;
+    Canvas canvas = Canvas(recorder, cull);
+
+    double columnWidth = size.width / columns;
+    double rowHeight = size.height / ( rows + 1 );
+    Size cell = Size(columnWidth, rowHeight);
+
+    columnRects.clear();
+
+    for (int row = -1; row < rows; row++) {
+      for (int column = 0; column < columns; column++) {
+
+        Offset cellOffset = Offset(
+            ( column ) * columnWidth,
+            ( row + 1 ) * rowHeight
+        );
+
+        if ( row == -1 ) {
+
+          if (game.state != null && game.validDrop(column) && dropChip == null) {
+            Size fullColumn = Size(columnWidth, size.height);
+            columnRects.add(cellOffset & fullColumn);
+          } else {
+            columnRects.add(null);
+          }
+
+          continue;
+        }
+
+
+
+
+        Rect cellRect = cellOffset & cell;
+
+        FourPlayer chip = game.cellState(row, column);
+        FourPlayer decoration = game.cellDecoration(row, column);
+        if ( chip == null ) {
+          drawFrame(canvas, cellRect);
+        } else {
+          drawChip(canvas, cellRect, true, decoration!=null, _playerToChipColor(chip));
+        }
+        
+      }
+    }
+
+    Picture p = recorder.endRecording();
+    _frameCache = p.toImage(size.width.toInt(), size.height.toInt());
+    _frameCacheSize = size;
+    _frameStateCount = game.stateCount;
+  }
+
+
+
+
   @override
   void paint(Canvas canvas, Size size ) {
 
+    if ( _frameCache == null || _frameCacheSize != size || _frameStateCount != game.stateCount ) {
+      _buildFrame(size);
+    }
+    
     double columnWidth = size.width / columns;
     double rowHeight = size.height / ( rows + 1 );
     Size cell = Size(columnWidth, rowHeight);
@@ -136,49 +208,34 @@ class BoardPainter extends CustomPainter {
     }
 
 
-    for (int row = -1; row < rows; row++) {
-      for (int column = 0; column < columns; column++) {
+    // this could still be optimized into the cache. Just need to keep
+    // track of state of top row and cached top row.
+    int row = -1;
+    for (int column = 0; column < columns; column++) {
+      Offset cellOffset = Offset(
+          (column) * columnWidth,
+          (row + 1) * rowHeight
+      );
 
-        Offset cellOffset = Offset(
-          ( column ) * columnWidth,
-          ( row + 1 ) * rowHeight
-        );
+      Rect cellRect = cellOffset & cell;
 
-        Rect cellRect = cellOffset & cell;
-
-        if (row == -1) {
-          if (game.state!=null) {
-            if (game.validDrop(column) && dropChip == null) {
-              drawChip(canvas, cellRect, false, false, _playerToChipColor(game.state));
-              Size fullColumn = Size(columnWidth, size.height);
-              columnRects.add(cellOffset & fullColumn);
-            } else {
-              columnRects.add(null);
-            }
-          }
-        } else {
-
-          FourPlayer chip = game.cellState(row, column);
-          FourPlayer decoration = game.cellDecoration(row, column);
-          if ( chip == null ) {
-            drawFrame(canvas, cellRect);
-          } else {
-            drawChip(canvas, cellRect, true, decoration!=null, _playerToChipColor(chip));
-          }
-
-        }
+      if (game.state != null && game.validDrop(column) && dropChip == null) {
+        drawChip(canvas, cellRect, false, false, _playerToChipColor(game.state));
       }
+
     }
+
+    canvas.drawImage(_frameCache, Offset(0.0, 0.0), Paint());
   }
 
   @override
   bool shouldRepaint(BoardPainter oldDelegate) {
-    if ( game.changeCount != lastGameChangeCount ) {
-      lastGameChangeCount = game.changeCount;
+    if ( game.stateCount != lastGameChangeCount ) {
+      lastGameChangeCount = game.stateCount;
       return true;
     }
-    lastGameChangeCount = game.changeCount;
-    return true;
+    lastGameChangeCount = game.stateCount;
+    return false;
   }
 
   @override

@@ -257,7 +257,7 @@ class MinMaxPlayer extends Player {
       }
 
       // be stupid on occasion so the humans may win.
-      if ( _maxRecursion < 8 && _rand.nextDouble() <  1.0 / (_maxRecursion * 1.25 ) ) {
+      if ( _maxRecursion < 6 && _rand.nextDouble() <  1.0 / (_maxRecursion * 1.25 ) ) {
         return _pickRandomColumn(game);
       }
 

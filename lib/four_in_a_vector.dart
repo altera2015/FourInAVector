@@ -40,7 +40,7 @@ class FourInAVector {
 
   PubSub undoPublisher = PubSub();
   bool movePending = false;
-  int changeCount = 1;
+  int stateCount = 1;
   int rows;
   int columns;
 
@@ -139,7 +139,7 @@ class FourInAVector {
       return false;
     }
 
-    changeCount++;
+    stateCount++;
     pieces[row * columns + column] = player;
     return true;
   }
@@ -152,7 +152,7 @@ class FourInAVector {
       return false;
     }
 
-    changeCount++;
+    stateCount++;
     cellDecorations[row * columns + column] = player;
     return true;
   }
@@ -192,7 +192,7 @@ class FourInAVector {
           FourPlayer w = _checkForCountInARow(row, column, direction.rowInc, direction.colInc);
           if (w != null ) {
             _fillInARow(row, column, direction.rowInc, direction.colInc, w);
-            changeCount++;
+            stateCount++;
             winner = w;
           }
         });
@@ -204,7 +204,7 @@ class FourInAVector {
 
   // Reset the state back to initial.
   void restart() {
-    changeCount++;
+    stateCount++;
     winner = null;
     state = FourPlayer.RED;
     pieces.fillRange(0, pieces.length, null);
@@ -241,7 +241,7 @@ class FourInAVector {
     }
 
     // set back the old states.
-    changeCount++;
+    stateCount++;
     UndoState us = _undoStates.removeLast();
     state = us.state;
     winner = us.winner;
