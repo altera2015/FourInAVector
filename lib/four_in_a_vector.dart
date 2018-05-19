@@ -36,6 +36,7 @@ class UndoState {
 // The main game class.
 class FourInAVector {
 
+  int changeCount = 1;
   int rows;
   int columns;
 
@@ -134,6 +135,7 @@ class FourInAVector {
       return false;
     }
 
+    changeCount++;
     pieces[row * columns + column] = player;
     return true;
   }
@@ -145,6 +147,8 @@ class FourInAVector {
     if ( column < 0 || column >= columns ) {
       return false;
     }
+
+    changeCount++;
     cellDecorations[row * columns + column] = player;
     return true;
   }
@@ -184,6 +188,7 @@ class FourInAVector {
           FourPlayer w = _checkForCountInARow(row, column, direction.rowInc, direction.colInc);
           if (w != null ) {
             _fillInARow(row, column, direction.rowInc, direction.colInc, w);
+            changeCount++;
             winner = w;
           }
         });
@@ -195,6 +200,7 @@ class FourInAVector {
 
   // Reset the state back to initial.
   void restart() {
+    changeCount++;
     winner = null;
     state = FourPlayer.RED;
     pieces.fillRange(0, pieces.length, null);
@@ -218,6 +224,7 @@ class FourInAVector {
     }
 
     // set back the old states.
+    changeCount++;
     UndoState us = _undoStates.removeLast();
     state = us.state;
     winner = us.winner;

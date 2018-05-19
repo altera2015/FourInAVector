@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'gameboard.dart';
+import 'gamescreen.dart';
 import 'player.dart';
 import 'randomplayer.dart';
 import 'minmaxplayer.dart';
@@ -158,7 +158,7 @@ class HomeScreenState extends State<HomeScreen> {
 
                 Navigator.push(
                   context,
-                  new MaterialPageRoute(builder: (context) => GameBoard(title: 'Four in a Vector', players: players)),
+                  new MaterialPageRoute(builder: (context) => GameScreen(title: 'Four in a Vector', players: players)),
                 );
 
               },
@@ -173,7 +173,7 @@ class HomeScreenState extends State<HomeScreen> {
 
                 Navigator.push(
                   context,
-                  new MaterialPageRoute(builder: (context) => GameBoard(title: 'Four in a Vector', players: players)),
+                  new MaterialPageRoute(builder: (context) => GameScreen(title: 'Four in a Vector', players: players)),
                 );
               }
             ),
@@ -187,7 +187,7 @@ class HomeScreenState extends State<HomeScreen> {
 
                 Navigator.push(
                   context,
-                  new MaterialPageRoute(builder: (context) => GameBoard(title: 'Four in a Vector', players: players)),
+                  new MaterialPageRoute(builder: (context) => GameScreen(title: 'Four in a Vector', players: players)),
                 );
               }
             ),
@@ -201,7 +201,7 @@ class HomeScreenState extends State<HomeScreen> {
 
                   Navigator.push(
                     context,
-                    new MaterialPageRoute(builder: (context) => GameBoard(title: 'Four in a Vector', players: players)),
+                    new MaterialPageRoute(builder: (context) => GameScreen(title: 'Four in a Vector', players: players)),
                   );
                 }
             ),
@@ -215,7 +215,7 @@ class HomeScreenState extends State<HomeScreen> {
 
                   Navigator.push(
                     context,
-                    new MaterialPageRoute(builder: (context) => GameBoard(title: 'Four in a Vector', players: players)),
+                    new MaterialPageRoute(builder: (context) => GameScreen(title: 'Four in a Vector', players: players)),
                   );
                 }
             )
