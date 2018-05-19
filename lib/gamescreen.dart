@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'four_in_a_vector.dart';
 import 'player.dart';
-
 import 'boardwidget.dart';
 
 class GameScreen extends StatefulWidget {
 
   final Map<FourPlayer, Player> players;
+  final int rows;
+  final int columns;
 
-  GameScreen({Key key, this.title, this.players}) : super(key: key);
+  GameScreen({Key key, this.title, this.players, this.rows, this.columns}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -22,7 +23,7 @@ class GameScreen extends StatefulWidget {
   final String title;
 
   @override
-  GameScreenState createState() => GameScreenState(6,7, players);
+  GameScreenState createState() => GameScreenState(this.rows,this.columns, players);
 }
 
 class GameScreenState extends State<GameScreen> {
@@ -41,16 +42,6 @@ class GameScreenState extends State<GameScreen> {
     var gameBoard = GameBoard(
         game: _game,
         players: _players
-        /*
-        onChipDropped: (int column){
-
-
-
-        },
-
-        onTapped: (int column) {
-
-        }*/
     );
 
     return Padding(
@@ -89,14 +80,7 @@ class GameScreenState extends State<GameScreen> {
       persistentFooterButtons: <Widget>[
         FlatButton(
             onPressed: () {
-              setState(() {
-               /*  if ( _turnStream != null ) {
-                  _turnStream.cancel();
-                  _turnStream = null;
-                }*/
-                _game.undo();
-                // nextTurn();
-              });
+              _game.undo();
             },
             child: Text("Undo")
         )

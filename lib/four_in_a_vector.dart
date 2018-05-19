@@ -15,6 +15,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import 'pubsub.dart';
+
 // Player constants
 enum FourPlayer { RED, YELLOW }
 
@@ -36,6 +38,8 @@ class UndoState {
 // The main game class.
 class FourInAVector {
 
+  PubSub undoPublisher = PubSub();
+  bool movePending = false;
   int changeCount = 1;
   int rows;
   int columns;
@@ -222,6 +226,10 @@ class FourInAVector {
 
   void undo() {
 
+    if ( movePending ) {
+      return;
+    }
+
     // do we have any old moves?
     if ( _undoStates.length == 0 ) {
       return;
@@ -238,10 +246,16 @@ class FourInAVector {
     state = us.state;
     winner = us.winner;
     _setCellState(us.row, us.column, null);
+
+    undoPublisher.pub(null);
   }
 
   // Drop a piece according to the current player.
   bool dropPiece( int column ) {
+
+    if ( movePending ) {
+      return false;
+    }
 
     int row = findFreeRow(column);
     if ( row == null ) {
@@ -272,7 +286,12 @@ class FourInAVector {
         }
       }
     }
+    movePending = false;
     return true;
+  }
+
+  void setMovePending( bool pending ) {
+    movePending = pending;
   }
 
 }

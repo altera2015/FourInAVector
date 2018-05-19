@@ -106,6 +106,7 @@ class MinMaxPlayer extends Player {
 
   int _maxRecursion;
   bool _requestCancel;
+  Random _rand;
 
   // we needed a number that is big enough to not occur by additions
   // on the board but small enough so that we can subtract single digits.
@@ -116,6 +117,7 @@ class MinMaxPlayer extends Player {
   MinMaxPlayer(FourPlayer player, int maxRecursion) : super(player) {
     _maxRecursion = maxRecursion;
     _requestCancel = false;
+    _rand = Random( DateTime.now().microsecondsSinceEpoch );
   }
 
   @override
@@ -225,6 +227,15 @@ class MinMaxPlayer extends Player {
 
   }
 
+  int _pickRandomColumn(FourInAVector game) {
+    int col;
+    do
+    {
+      col = _rand.nextInt(game.columns);
+    }
+    while ( !game.validDrop(col) );
+    return col;
+  }
 
   @override
   Future<int> makeMove( FourInAVector game ) {
@@ -243,6 +254,11 @@ class MinMaxPlayer extends Player {
       int centerColumn = (game.columns / 2).floor();
       if ( game.cellState(game.rows-1, centerColumn ) == null ) {
         return centerColumn;
+      }
+
+      // be stupid on occasion so the humans may win.
+      if ( _maxRecursion < 8 && _rand.nextDouble() <  1.0 / (_maxRecursion * 1.25 ) ) {
+        return _pickRandomColumn(game);
       }
 
       int result = minMaxDecision(game);

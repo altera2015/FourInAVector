@@ -150,7 +150,8 @@ class BoardPainter extends CustomPainter {
           if (game.state!=null) {
             if (game.validDrop(column) && dropChip == null) {
               drawChip(canvas, cellRect, false, false, _playerToChipColor(game.state));
-              columnRects.add(cellRect);
+              Size fullColumn = Size(columnWidth, size.height);
+              columnRects.add(cellOffset & fullColumn);
             } else {
               columnRects.add(null);
             }
@@ -212,7 +213,6 @@ class GameBoardState extends State<GameBoard> with SingleTickerProviderStateMixi
   final FourInAVector game;
   final Map<FourPlayer, Player> players;
   StreamSubscription<int> _turnStream;
-  FourPlayer _turnStreamPlayer;
 
   GameBoardState(this.game, this.players) {
     this._columns = game.columns;
@@ -223,6 +223,7 @@ class GameBoardState extends State<GameBoard> with SingleTickerProviderStateMixi
 
     if ( game.validDrop(column) && dropChip==null ) {
 
+      game.setMovePending(true);
       setState( () {
         int row = game.findFreeRow(column);
         dropChip = DropChip(row, column, game.state);
@@ -237,16 +238,26 @@ class GameBoardState extends State<GameBoard> with SingleTickerProviderStateMixi
 
   }
 
+  int _undoListenerKey;
+  void _undoListener( List<dynamic> args ) {
+
+    if ( _turnStream != null ) {
+      _turnStream.cancel();
+      _turnStream = null;
+    }
+    setState(() {
+      nextTurn();
+    });
+  }
+
   void nextTurn() {
 
     if ( game.state == null ) {
-      _turnStreamPlayer = null;
       return;
     }
 
     Future<int> f = players[game.state].makeMove(game);
 
-    _turnStreamPlayer = game.state;
     _turnStream = f.asStream().listen((column){
 
       _turnStream.cancel();
@@ -261,6 +272,8 @@ class GameBoardState extends State<GameBoard> with SingleTickerProviderStateMixi
   }
 
   initState() {
+
+    _undoListenerKey = game.undoPublisher.sub(_undoListener);
 
     super.initState();
     controller = new AnimationController(
@@ -279,6 +292,7 @@ class GameBoardState extends State<GameBoard> with SingleTickerProviderStateMixi
         if ( dropChip != null ) {
 
           setState(() {
+            game.setMovePending(false);
             game.dropPiece(dropChip.column);
             dropChip = null;
             nextTurn();
@@ -293,6 +307,7 @@ class GameBoardState extends State<GameBoard> with SingleTickerProviderStateMixi
   }
 
   dispose() {
+    game.undoPublisher.unsub(_undoListenerKey);
     controller.dispose();
     super.dispose();
   }
@@ -301,12 +316,8 @@ class GameBoardState extends State<GameBoard> with SingleTickerProviderStateMixi
   @override
   Widget build(BuildContext context) {
 
-    if (animation.status == AnimationStatus.forward) {
+    if (dropChip != null && animation.status == AnimationStatus.forward) {
       dropChip.y = animation.value;
-    }
-
-    if ( game.state != _turnStreamPlayer ) {
-      nextTurn();
     }
 
     var bp = BoardPainter(_rows, _columns, game, dropChip);

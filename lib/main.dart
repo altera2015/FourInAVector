@@ -51,175 +51,218 @@ class HomeScreen extends StatefulWidget {
   HomeScreenState createState() => HomeScreenState();
 }
 
-
 class HomeScreenState extends State<HomeScreen> {
-
   bool playerRedHuman = true;
-  bool playerYellowHuman = true;
+  bool playerYellowHuman = false;
   double playerRedLevel = 0.0;
-  double playerYellowLevel = 0.0;
+  double playerYellowLevel = 1.0;
+  double _rows = 6.0;
+  double _columns = 7.0;
+
+  Widget buildMenu(BuildContext context) {
+    return Padding(
+        padding: new EdgeInsets.all(30.0),
+        child: Column(
+
+
+          children: <Widget>[
+
+            Padding(
+                padding: new EdgeInsets.all(18.0),
+                child: Center(
+                  child: Text(
+                    "Choose your game mode",
+                    textScaleFactor: 1.5,
+                    style: new TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                )),
+            Table(
+              children: [
+                TableRow(children: [
+                  Center(child: Text("Player Type")),
+                  Center(child: Text("AI strength"))
+                ]),
+                TableRow(children: [
+                  Row(children: [
+                    Image.asset("images/red.png"),
+                    Switch(
+                        value: playerRedHuman,
+                        onChanged: (bool v) {
+                          setState(() {
+                            playerRedHuman = v;
+                          });
+                        }),
+                    Text(playerRedHuman ? "Human" : "AI"),
+                  ]),
+                  TableCell(
+                      verticalAlignment: TableCellVerticalAlignment.middle,
+                      child: Slider(
+                          onChanged: (double v) {
+                            setState(() {
+                              playerRedLevel = v;
+                            });
+                          },
+                          value: playerRedLevel,
+                          min: 0.0,
+                          max: 4.0,
+                          divisions: 4))
+                ]),
+                TableRow(children: [
+                  Row(children: [
+                    Image.asset("images/yellow.png"),
+                    Switch(
+                        value: playerYellowHuman,
+                        onChanged: (bool v) {
+                          setState(() {
+                            playerYellowHuman = v;
+                          });
+                        }),
+                    Text(playerYellowHuman ? "Human" : "AI"),
+                  ]),
+                  TableCell(
+                      verticalAlignment: TableCellVerticalAlignment.middle,
+                      child: Slider(
+                        onChanged: (double v) {
+                          setState(() {
+                            playerYellowLevel = v;
+                          });
+                        },
+                        value: playerYellowLevel,
+                        min: 0.0,
+                        max: 4.0,
+                        divisions: 4,
+                      )),
+                ])
+              ],
+            ),
+
+            Padding(
+                padding: new EdgeInsets.all(18.0),
+                child: Center(
+                  child: Text(
+                    "Game board size",
+                    textScaleFactor: 1.5,
+                    style: new TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                )),
+
+            Table(children: [
+              TableRow(children: [
+                TableCell(
+                    verticalAlignment: TableCellVerticalAlignment.middle,
+                    child: Text("Rows: ${_rows.toInt()}")),
+                TableCell(
+                    verticalAlignment: TableCellVerticalAlignment.middle,
+                    child: Slider(
+                      onChanged: (double v) {
+                        setState(() {
+                          _rows = v;
+                        });
+                      },
+                      value: _rows,
+                      min: 4.0,
+                      max: 10.0,
+                      divisions: 6,
+                    ))
+              ]),
+              TableRow(children: [
+                TableCell(
+                    verticalAlignment: TableCellVerticalAlignment.middle,
+                    child: Text("Columns: ${_columns.toInt()}")),
+                TableCell(
+                    verticalAlignment: TableCellVerticalAlignment.middle,
+                    child: Slider(
+                      onChanged: (double v) {
+                        setState(() {
+                          _columns = v;
+                        });
+                      },
+                      value: _columns,
+                      min: 4.0,
+                      max: 10.0,
+                      divisions: 6,
+                    ))
+              ]),
+            ]),
+            Padding(
+                padding: new EdgeInsets.all(10.0),
+                child: RaisedButton(
+                  child: Text("Play!"),
+                  onPressed: () {
+                    Map<FourPlayer, Player> players = Map<FourPlayer, Player>();
+                    if (playerRedHuman) {
+                      players[FourPlayer.RED] = HumanPlayer(FourPlayer.RED);
+                    } else {
+                      if (playerRedLevel == 0.0) {
+                        players[FourPlayer.RED] = RandomPlayer(FourPlayer.RED);
+                      } else {
+                        int l = playerRedLevel.toInt() * 2;
+                        players[FourPlayer.RED] =
+                            MinMaxPlayer(FourPlayer.RED, l);
+                      }
+                    }
+
+                    if (playerYellowHuman) {
+                      players[FourPlayer.YELLOW] =
+                          HumanPlayer(FourPlayer.YELLOW);
+                    } else {
+                      if (playerYellowLevel == 0.0) {
+                        players[FourPlayer.YELLOW] =
+                            RandomPlayer(FourPlayer.YELLOW);
+                      } else {
+                        int l = playerYellowLevel.toInt() * 2;
+                        players[FourPlayer.YELLOW] =
+                            MinMaxPlayer(FourPlayer.YELLOW, l);
+                      }
+                    }
+
+                    Navigator.push(
+                      context,
+                      new MaterialPageRoute(
+                          builder: (context) => GameScreen(
+                              title: 'Four in a Vector', players: players, rows: _rows.toInt(), columns: _columns.toInt())),
+                    );
+                  },
+                )),
+            Padding(
+                padding: new EdgeInsets.all(5.0),
+                child: RaisedButton(
+                  child: Text("Quick Player against AI"),
+                  onPressed: () {
+                    Map<FourPlayer, Player> players = Map<FourPlayer, Player>();
+                    players[FourPlayer.RED] = MinMaxPlayer(FourPlayer.RED, 2);
+                    players[FourPlayer.YELLOW] = HumanPlayer(FourPlayer.YELLOW);
+
+                    Navigator.push(
+                      context,
+                      new MaterialPageRoute(
+                          builder: (context) => GameScreen(
+                              title: 'Four in a Vector', players: players, rows: _rows.toInt(), columns: _columns.toInt() )),
+                    );
+                  },
+                )),
+
+          ],
+        ));
+  }
 
   @override
   Widget build(BuildContext context) {
-
-
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            Padding(
-              padding: new EdgeInsets.all(18.0),
-              child: Center (
-                child: Text ("Choose your game mode:"),
-              )
-            ),
-            Row(
-              children: [
-                Image.asset( "images/red.png" ),
-                Text ( playerRedHuman ? "Human" : "AI" ),
-                Switch(
-                    value: playerRedHuman,
-                    onChanged:(bool v) {
-                      setState( () {
-                        playerRedHuman = v;
-                      });
-                    }
-                ),
-                Slider(
-                  onChanged:(double v) {
-                    setState( () {
-                      playerRedLevel = v;
-                    });
-                  },
-                  value: playerRedLevel,
-                  min: 0.0,
-                  max: 4.0,
-                  divisions: 4,
-                )
-              ]
-            ),
-            Row(
-                children: [
-                  Image.asset( "images/yellow.png" ),
-                  Text ( playerYellowHuman ? "Human" : "AI" ),
-                  Switch(
-                      value: playerYellowHuman,
-                      onChanged:(bool v) {
-                        setState( () {
-                          playerYellowHuman = v;
-                        });
-                      }
-                  ),
-                  Slider(
-                    onChanged:(double v) {
-                      setState( () {
-                        playerYellowLevel = v;
-                        debugPrint("$playerYellowLevel");
-                      });
-                    },
-                    value: playerYellowLevel,
-                    min: 0.0,
-                    max: 4.0,
-                    divisions: 4,
-                  )
-                ]
-            ),
-            RaisedButton(
-              child: Text("Play!"),
-              onPressed: (){
-
-                Map<FourPlayer, Player> players = Map<FourPlayer, Player>();
-                if ( playerRedHuman ) {
-                  players[FourPlayer.RED]  = HumanPlayer( FourPlayer.RED );
-                } else {
-                  if ( playerRedLevel == 0.0 ) {
-                    players[FourPlayer.RED]  = RandomPlayer( FourPlayer.RED );
-                  } else {
-                    int l = playerRedLevel.toInt() * 2;
-                    players[FourPlayer.RED]  = MinMaxPlayer( FourPlayer.RED, l);
-                  }
-                }
-
-                if ( playerYellowHuman ) {
-                  players[FourPlayer.YELLOW]  = HumanPlayer( FourPlayer.YELLOW );
-                } else {
-                  if ( playerYellowLevel == 0.0 ) {
-                    players[FourPlayer.YELLOW]  = RandomPlayer( FourPlayer.YELLOW );
-                  } else {
-                    int l = playerYellowLevel.toInt() * 2;
-                    players[FourPlayer.YELLOW]  = MinMaxPlayer( FourPlayer.YELLOW, l );
-                  }
-                }
-
-                Navigator.push(
-                  context,
-                  new MaterialPageRoute(builder: (context) => GameScreen(title: 'Four in a Vector', players: players)),
-                );
-
-              },
-            ),
-            ListTile (
-              title: Text("Two Player"),
-              onTap:() {
-
-                Map<FourPlayer, Player> players = Map<FourPlayer, Player>();
-                players[FourPlayer.RED]  = HumanPlayer( FourPlayer.RED );
-                players[FourPlayer.YELLOW]  = HumanPlayer( FourPlayer.YELLOW );
-
-                Navigator.push(
-                  context,
-                  new MaterialPageRoute(builder: (context) => GameScreen(title: 'Four in a Vector', players: players)),
-                );
-              }
-            ),
-            ListTile(
-              title: Text("One Player against AI (Easy)"),
-              onTap: () {
-
-                Map<FourPlayer, Player> players = Map<FourPlayer, Player>();
-                players[FourPlayer.RED]  = RandomPlayer( FourPlayer.RED );
-                players[FourPlayer.YELLOW]  = HumanPlayer( FourPlayer.YELLOW );
-
-                Navigator.push(
-                  context,
-                  new MaterialPageRoute(builder: (context) => GameScreen(title: 'Four in a Vector', players: players)),
-                );
-              }
-            ),
-            ListTile(
-                title: Text("One Player against AI (Medium)"),
-                onTap: () {
-
-                  Map<FourPlayer, Player> players = Map<FourPlayer, Player>();
-                  players[FourPlayer.RED]  = MinMaxPlayer( FourPlayer.RED, 2 );
-                  players[FourPlayer.YELLOW]  = HumanPlayer( FourPlayer.YELLOW );
-
-                  Navigator.push(
-                    context,
-                    new MaterialPageRoute(builder: (context) => GameScreen(title: 'Four in a Vector', players: players)),
-                  );
-                }
-            ),
-            ListTile(
-                title: Text("One Player against AI (Hard)"),
-                onTap: () {
-
-                  Map<FourPlayer, Player> players = Map<FourPlayer, Player>();
-                  players[FourPlayer.RED]  = MinMaxPlayer( FourPlayer.RED, 6 );
-                  players[FourPlayer.YELLOW]  = HumanPlayer( FourPlayer.YELLOW );
-
-                  Navigator.push(
-                    context,
-                    new MaterialPageRoute(builder: (context) => GameScreen(title: 'Four in a Vector', players: players)),
-                  );
-                }
+        appBar: AppBar(
+          // Here we take the value from the MyHomePage object that was created by
+          // the App.build method, and use it to set our appbar title.
+          title: Text(widget.title),
+        ),
+        body: DecoratedBox(
+          decoration: BoxDecoration (
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [ Color(0xffa7d3f9), Color(0xffd0e6f9)]
             )
-          ]
+          ),
+          child: buildMenu(context)
         )
     );
   }
