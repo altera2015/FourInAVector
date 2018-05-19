@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'four_in_a_vector.dart';
 import 'player.dart';
 import 'dart:async';
+import 'framepainter.dart';
 
 class GameBoard extends StatefulWidget {
 
@@ -44,6 +45,17 @@ class GameBoardState extends State<GameBoard> {
         return 'images/yellow.png';
       default:
         return 'images/white.png';
+    }
+  }
+
+  Color _playerToChipColor( FourPlayer player ) {
+    switch ( player ) {
+      case FourPlayer.RED:
+        return RedChipColor;
+      case FourPlayer.YELLOW:
+        return YellowChipColor;
+      default:
+        return Color(0);
     }
   }
 
@@ -90,6 +102,7 @@ class GameBoardState extends State<GameBoard> {
                         icon: Image.asset( assetName ),
                         iconSize: 40.0,
 
+
                         onPressed:() {
 
                           // game has ended or invalid column clicked!
@@ -120,13 +133,94 @@ class GameBoardState extends State<GameBoard> {
 
   }
 
+
+  List<TableRow> _buildArenaWidgets2(rows, columns) {
+
+    return new List<TableRow>.generate(
+        rows + 1,
+            (int row) => TableRow(
+            children: List<Widget>.generate(
+            columns, (int column) {
+
+                if ( row == 0 ) {
+
+                  bool validCol = _game.validDrop(column);
+                  if ( !validCol ) {
+                    return CustomPaint(
+                        size: Size(37.0, 37.0),
+                        painter: ChipPainter( Color(0), false )
+                    );
+                  }
+
+                  return GestureDetector(
+                    onTap: () {
+                      // game has ended or invalid column clicked!
+                      if ( _game.state == null || !validCol ) {
+                        return;
+                      }
+
+                      _players[_game.state].columnClicked(column);
+
+                    },
+                    child: CustomPaint(
+                        size: Size(37.0, 37.0),
+                        painter: ChipPainter( _playerToChipColor(_game.state), false )
+                    )
+                  );
+
+                } else {
+
+
+                  FourPlayer state = _game.cellState(row-1, column);
+
+                  if ( state==null) {
+                    return CustomPaint(
+                        size: Size(37.0, 37.0),
+                        painter: FramePainter( )
+                    );
+
+                  } else {
+
+                    var cp = ChipPainter( _playerToChipColor(state), true  );
+
+                    if ( _game.cellDecoration(row-1, column)!=null) {
+                      cp.frameColor = Color(0xff88ee88);
+                    }
+
+                    return CustomPaint(
+                        size: Size(37.0, 37.0),
+                        painter: cp
+                    );
+
+                  }
+
+                }
+
+            }
+        )
+    )
+    );
+
+  }
+
   Widget _buildArena() {
     return Table(
-        defaultColumnWidth: FixedColumnWidth(35.0),
-        children: _buildArenaWidgets(_game.rows, _game.columns),
-        border: TableBorder.all()
-    );
+        defaultColumnWidth: FixedColumnWidth(37.0),
+        children: _buildArenaWidgets2(_game.rows, _game.columns),
+        border: TableBorder()
+      );
   }
+
+
+
+  Widget _buildStack() {
+
+    return Center(
+          child: _buildArena()
+        );
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +238,7 @@ class GameBoardState extends State<GameBoard> {
       ),
 
       body: Center(
-        child: _buildArena(),
+        child: _buildStack(),
       ),
 
 
