@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'four_in_a_vector.dart';
 import 'player.dart';
-import 'dart:async';
+
 import 'boardwidget.dart';
 
 class GameScreen extends StatefulWidget {
@@ -28,51 +28,37 @@ class GameScreen extends StatefulWidget {
 class GameScreenState extends State<GameScreen> {
   FourInAVector _game;
   Map<FourPlayer, Player> _players;
-  StreamSubscription<int> _turnStream;
 
   GameScreenState(int rows, int columns, Map<FourPlayer, Player> players )  {
     _players = players;
     _game = FourInAVector(rows, columns);
     // _game.preloadState();
-    nextTurn();
   }
 
-  void nextTurn() {
-
-    if ( _game.state == null ) {
-      return;
-    }
-
-    Future<int> f = _players[_game.state].makeMove(_game);
-    _turnStream = f.asStream().listen((col){
-
-      _turnStream.cancel();
-      _turnStream = null;
-      setState( (){
-        if ( col >= 0 ) {
-          _game.dropPiece(col);
-          if ( _game.state != null ) {
-            nextTurn();
-          }
-        }
-      });
-    });
-  }
 
   Widget _buildStack() {
+
+    var gameBoard = GameBoard(
+        game: _game,
+        players: _players
+        /*
+        onChipDropped: (int column){
+
+
+
+        },
+
+        onTapped: (int column) {
+
+        }*/
+    );
+
     return Padding(
         padding: new EdgeInsets.all(18.0),
         child: Center(
             child: AspectRatio(
                 aspectRatio: 1.1,
-                child: GameBoard(
-                    game: _game,
-                    onTapped: (int column) {
-                      if (column != null) {
-                        _players[_game.state].columnClicked(column);
-                      }
-                    }
-                )
+                child: gameBoard
             )
         )
     );
@@ -104,12 +90,12 @@ class GameScreenState extends State<GameScreen> {
         FlatButton(
             onPressed: () {
               setState(() {
-                if ( _turnStream != null ) {
+               /*  if ( _turnStream != null ) {
                   _turnStream.cancel();
                   _turnStream = null;
-                }
+                }*/
                 _game.undo();
-                nextTurn();
+                // nextTurn();
               });
             },
             child: Text("Undo")

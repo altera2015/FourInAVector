@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'Four in a Vector',
+      title: 'Four In a Vector',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       // home: new GameBoard(title: 'Four in a Vector'),
-      home: new HomeScreen(title: 'Four in a Vector'),
+      home: new HomeScreen(title: 'Four In a Vector'),
     );
   }
 }

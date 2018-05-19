@@ -2,6 +2,8 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'four_in_a_vector.dart';
+import 'player.dart';
+import 'dart:async';
 
 const Color FrameColor = Color(0xff416ff1);
 const Color FrameHighlightColor = Color(0xff33ff33);
@@ -42,7 +44,7 @@ class BoardPainter extends CustomPainter {
 
   int tapToColumns( Offset o ) {
     for (int i=0;i< columnRects.length; i++){
-      if ( columnRects[i].contains(o)) {
+      if ( columnRects[i] != null && columnRects[i].contains(o)) {
         return i;
       }
     }
@@ -182,20 +184,20 @@ class BoardPainter extends CustomPainter {
   bool shouldRebuildSemantics(BoardPainter oldDelegate) => false;
 
 }
-typedef void ColumnTappedCB(int column) ;
 
 class GameBoard extends StatefulWidget {
 
-  final FourInAVector game;
-  final ColumnTappedCB onTapped;
+  static GameBoardState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<GameBoardState>());
 
+  final FourInAVector game;
+  final Map<FourPlayer, Player> players;
   GameBoard({
     this.game,
-    this.onTapped
+    this.players
   });
 
   @override
-  GameBoardState createState() => GameBoardState(game, onTapped);
+  GameBoardState createState() => GameBoardState(game, players);
 }
 
 
@@ -208,18 +210,61 @@ class GameBoardState extends State<GameBoard> with SingleTickerProviderStateMixi
   DropChip dropChip;
 
   final FourInAVector game;
-  final ColumnTappedCB onTapped;
+  final Map<FourPlayer, Player> players;
+  StreamSubscription<int> _turnStream;
+  FourPlayer _turnStreamPlayer;
 
-  GameBoardState(this.game, this.onTapped) {
+  GameBoardState(this.game, this.players) {
     this._columns = game.columns;
     this._rows = game.rows;
+  }
+
+  bool tryDropChip(int column) {
+
+    if ( game.validDrop(column) && dropChip==null ) {
+
+      setState( () {
+        int row = game.findFreeRow(column);
+        dropChip = DropChip(row, column, game.state);
+        controller.reset();
+        controller.forward();
+      });
+
+      return true;
+    }
+
+    return false;
+
+  }
+
+  void nextTurn() {
+
+    if ( game.state == null ) {
+      _turnStreamPlayer = null;
+      return;
+    }
+
+    Future<int> f = players[game.state].makeMove(game);
+
+    _turnStreamPlayer = game.state;
+    _turnStream = f.asStream().listen((column){
+
+      _turnStream.cancel();
+      _turnStream = null;
+      if ( column >= 0 ) {
+        if (!tryDropChip(column)) {
+          nextTurn();
+        }
+      }
+
+    });
   }
 
   initState() {
 
     super.initState();
     controller = new AnimationController(
-        duration: const Duration(milliseconds: 2000), vsync: this);
+        duration: const Duration(milliseconds: 1000), vsync: this);
     final CurvedAnimation curve = new CurvedAnimation(parent: controller, curve: Curves.bounceOut );
     animation = new Tween(begin: 0.0, end: 1.0).animate(curve)
       ..addListener(() {
@@ -231,12 +276,20 @@ class GameBoardState extends State<GameBoard> with SingleTickerProviderStateMixi
 
       if ( status == AnimationStatus.completed ) {
 
-        if ( onTapped != null ) {
-          onTapped(dropChip.column);
-          dropChip = null;
+        if ( dropChip != null ) {
+
+          setState(() {
+            game.dropPiece(dropChip.column);
+            dropChip = null;
+            nextTurn();
+          });
+
         }
+
       }
     });
+
+    nextTurn();
   }
 
   dispose() {
@@ -244,27 +297,29 @@ class GameBoardState extends State<GameBoard> with SingleTickerProviderStateMixi
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
 
-    if ( animation.status == AnimationStatus.forward) {
+    if (animation.status == AnimationStatus.forward) {
       dropChip.y = animation.value;
+    }
+
+    if ( game.state != _turnStreamPlayer ) {
+      nextTurn();
     }
 
     var bp = BoardPainter(_rows, _columns, game, dropChip);
 
     return CustomPaint(
-      child: GestureDetector (
+      child: GestureDetector(
         onTapUp: (TapUpDetails d) {
           final RenderBox referenceBox = context.findRenderObject();
           var pos = referenceBox.globalToLocal(d.globalPosition);
           var column = bp.tapToColumns(pos);
 
-          if ( game.validDrop(column) && dropChip==null ) {
-            int row = game.findFreeRow(column);
-            dropChip = DropChip(row, column, game.state);
-            controller.reset();
-            controller.forward();
+          if (column != null) {
+            players[game.state].columnClicked(column);
           }
         },
       ),
