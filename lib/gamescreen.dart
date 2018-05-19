@@ -73,7 +73,17 @@ class GameScreenState extends State<GameScreen> {
       ),
 
       body: Center(
-        child: _buildStack(),
+        child: DecoratedBox(
+            decoration: BoxDecoration (
+                gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [ Color(0xffa7d3f9), Color(0xfff4caa2)]
+                )
+            ),
+            child: _buildStack(),
+        )
+
       ),
 
 

@@ -59,131 +59,150 @@ class HomeScreenState extends State<HomeScreen> {
   double _rows = 6.0;
   double _columns = 7.0;
 
-  Widget buildMenu(BuildContext context) {
-    return Padding(
-        padding: new EdgeInsets.all(30.0),
-        child: Column(
-
-
-          children: <Widget>[
-
-            Padding(
-                padding: new EdgeInsets.all(18.0),
-                child: Center(
-                  child: Text(
-                    "Choose your game mode",
-                    textScaleFactor: 1.5,
-                    style: new TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                )),
-            Table(
-              children: [
-                TableRow(children: [
-                  Center(child: Text("Player Type")),
-                  Center(child: Text("AI strength"))
+  Widget buildGameTypeCard() {
+    return Card(
+        child: Padding(
+        padding: new EdgeInsets.all(10.0),
+        child: Column(children: [
+          Padding(
+              padding: new EdgeInsets.all(18.0),
+              child: Center(
+                child: Text(
+                  "Game mode",
+                  textScaleFactor: 1.5,
+                  style: new TextStyle(fontWeight: FontWeight.bold),
+                ),
+              )),
+          Table(
+            children: [
+              TableRow(children: [
+                Center(child: Text("Player Type")),
+                Center(child: Text("AI strength"))
+              ]),
+              TableRow(children: [
+                Row(children: [
+                  Image.asset("images/red.png"),
+                  Switch(
+                      value: playerRedHuman,
+                      onChanged: (bool v) {
+                        setState(() {
+                          playerRedHuman = v;
+                        });
+                      }),
+                  Text(playerRedHuman ? "Human" : "AI"),
                 ]),
-                TableRow(children: [
-                  Row(children: [
-                    Image.asset("images/red.png"),
-                    Switch(
-                        value: playerRedHuman,
-                        onChanged: (bool v) {
+                TableCell(
+                    verticalAlignment: TableCellVerticalAlignment.middle,
+                    child: Slider(
+                        onChanged: (double v) {
                           setState(() {
-                            playerRedHuman = v;
+                            playerRedLevel = v;
                           });
-                        }),
-                    Text(playerRedHuman ? "Human" : "AI"),
-                  ]),
+                        },
+                        value: playerRedLevel,
+                        min: 0.0,
+                        max: 4.0,
+                        divisions: 4))
+              ]),
+              TableRow(children: [
+                Row(children: [
+                  Image.asset("images/yellow.png"),
+                  Switch(
+                      value: playerYellowHuman,
+                      onChanged: (bool v) {
+                        setState(() {
+                          playerYellowHuman = v;
+                        });
+                      }),
+                  Text(playerYellowHuman ? "Human" : "AI"),
+                ]),
+                TableCell(
+                    verticalAlignment: TableCellVerticalAlignment.middle,
+                    child: Slider(
+                      onChanged: (double v) {
+                        setState(() {
+                          playerYellowLevel = v;
+                        });
+                      },
+                      value: playerYellowLevel,
+                      min: 0.0,
+                      max: 4.0,
+                      divisions: 4,
+                    )),
+              ])
+            ],
+          )
+        ])));
+  }
+
+  Widget buildBoardSizeMenu() {
+    return Card(
+        child: Padding(
+            padding: new EdgeInsets.all(10.0),
+            child: Column(children: [
+
+              Padding(
+                  padding: new EdgeInsets.all(18.0),
+                  child: Center(
+                    child: Text(
+                      "Game board size",
+                      textScaleFactor: 1.5,
+                      style: new TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  )),
+
+              Table(children: [
+                TableRow(children: [
                   TableCell(
                       verticalAlignment: TableCellVerticalAlignment.middle,
-                      child: Slider(
-                          onChanged: (double v) {
-                            setState(() {
-                              playerRedLevel = v;
-                            });
-                          },
-                          value: playerRedLevel,
-                          min: 0.0,
-                          max: 4.0,
-                          divisions: 4))
-                ]),
-                TableRow(children: [
-                  Row(children: [
-                    Image.asset("images/yellow.png"),
-                    Switch(
-                        value: playerYellowHuman,
-                        onChanged: (bool v) {
-                          setState(() {
-                            playerYellowHuman = v;
-                          });
-                        }),
-                    Text(playerYellowHuman ? "Human" : "AI"),
-                  ]),
+                      child: Text("Rows: ${_rows.toInt()}")),
                   TableCell(
                       verticalAlignment: TableCellVerticalAlignment.middle,
                       child: Slider(
                         onChanged: (double v) {
                           setState(() {
-                            playerYellowLevel = v;
+                            _rows = v;
                           });
                         },
-                        value: playerYellowLevel,
-                        min: 0.0,
-                        max: 4.0,
-                        divisions: 4,
-                      )),
-                ])
-              ],
-            ),
+                        value: _rows,
+                        min: 4.0,
+                        max: 10.0,
+                        divisions: 6,
+                      ))
+                ]),
+                TableRow(children: [
+                  TableCell(
+                      verticalAlignment: TableCellVerticalAlignment.middle,
+                      child: Text("Columns: ${_columns.toInt()}")),
+                  TableCell(
+                      verticalAlignment: TableCellVerticalAlignment.middle,
+                      child: Slider(
+                        onChanged: (double v) {
+                          setState(() {
+                            _columns = v;
+                          });
+                        },
+                        value: _columns,
+                        min: 4.0,
+                        max: 10.0,
+                        divisions: 6,
+                      ))
+                ]),
+              ])
+            ])));
+  }
 
-            Padding(
-                padding: new EdgeInsets.all(18.0),
-                child: Center(
-                  child: Text(
-                    "Game board size",
-                    textScaleFactor: 1.5,
-                    style: new TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                )),
+  Widget buildMenu(BuildContext context) {
+    return Padding(
+        padding: new EdgeInsets.all(10.0),
+        child: Column(
 
-            Table(children: [
-              TableRow(children: [
-                TableCell(
-                    verticalAlignment: TableCellVerticalAlignment.middle,
-                    child: Text("Rows: ${_rows.toInt()}")),
-                TableCell(
-                    verticalAlignment: TableCellVerticalAlignment.middle,
-                    child: Slider(
-                      onChanged: (double v) {
-                        setState(() {
-                          _rows = v;
-                        });
-                      },
-                      value: _rows,
-                      min: 4.0,
-                      max: 10.0,
-                      divisions: 6,
-                    ))
-              ]),
-              TableRow(children: [
-                TableCell(
-                    verticalAlignment: TableCellVerticalAlignment.middle,
-                    child: Text("Columns: ${_columns.toInt()}")),
-                TableCell(
-                    verticalAlignment: TableCellVerticalAlignment.middle,
-                    child: Slider(
-                      onChanged: (double v) {
-                        setState(() {
-                          _columns = v;
-                        });
-                      },
-                      value: _columns,
-                      min: 4.0,
-                      max: 10.0,
-                      divisions: 6,
-                    ))
-              ]),
-            ]),
+
+          children: <Widget>[
+
+            buildGameTypeCard(),
+            buildBoardSizeMenu(),
+
             Padding(
                 padding: new EdgeInsets.all(10.0),
                 child: RaisedButton(
