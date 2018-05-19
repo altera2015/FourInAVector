@@ -74,22 +74,23 @@ class _MyHomePageState extends State<MyHomePage> {
 
               if ( row==0 ) {
 
+                bool validCol = _game.validDrop(column);
+                String assetName = validCol ? _playerToAssetName(_game.state ) : "images/white.png";
+
                 return Container(
                     color: Color(0xda000000),
 
                     child: IconButton(
-                      icon: Image.asset( _playerToAssetName(_game.state ) ),
+                      icon: Image.asset( assetName ),
                       iconSize: 40.0,
 
                       onPressed:() {
 
-                        debugPrint(_game.state.toString());
-                        if ( _game.state == null ) {
+                        if ( _game.state == null || !validCol ) {
                           return;
                         }
 
                         setState(() {
-                          debugPrint("hello?");
                           _game.dropPiece(column);
                         });
                       }

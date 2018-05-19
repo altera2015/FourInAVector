@@ -153,8 +153,8 @@ class FourInAVector {
         });
       }
     }
-
   }
+
 
 
   // Reset the state back to initial.
@@ -163,6 +163,10 @@ class FourInAVector {
     state = FourPlayer.RED;
     pieces.fillRange(0, pieces.length, null);
     cellDecorations.fillRange(0, pieces.length, null);
+  }
+
+  bool validDrop( int column ) {
+    return cellState(0, column) == null;
   }
 
   // Drop a piece according to the current player.
