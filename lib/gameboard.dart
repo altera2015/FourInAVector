@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'four_in_a_vector.dart';
-import 'aiplayer.dart';
+import 'player.dart';
 import 'dart:async';
 
 class GameBoard extends StatefulWidget {
 
-  final AIPlayer aiPlayer;
+  final Map<FourPlayer, Player> players;
 
-  GameBoard({Key key, this.title, this.aiPlayer}) : super(key: key);
+  GameBoard({Key key, this.title, this.players}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -21,17 +21,17 @@ class GameBoard extends StatefulWidget {
   final String title;
 
   @override
-  GameBoardState createState() => GameBoardState(6,7, aiPlayer);
+  GameBoardState createState() => GameBoardState(6,7, players);
 }
 
 class GameBoardState extends State<GameBoard> {
   FourInAVector _game;
-  AIPlayer _aiPlayer;
+  Map<FourPlayer, Player> _players;
 
-  GameBoardState(int rows, int columns, AIPlayer aiPlayer )  {
-    _aiPlayer = aiPlayer;
+  GameBoardState(int rows, int columns, Map<FourPlayer, Player> players )  {
+    _players = players;
     _game = FourInAVector(rows, columns);
-    aiTurn();
+    nextTurn();
   }
 
   String _playerToAssetName( FourPlayer player ) {
@@ -45,16 +45,17 @@ class GameBoardState extends State<GameBoard> {
     }
   }
 
-  void aiTurn() {
+  void nextTurn() {
 
-    if ( _aiPlayer == null || _aiPlayer.player != _game.state ) {
+    if ( _game.state == null ) {
       return;
     }
 
-    Future<int> f = _aiPlayer.makeMove(_game);
+    Future<int> f = _players[_game.state].makeMove(_game);
     f.then((col) {
       setState( (){
         _game.dropPiece(col);
+        nextTurn();
       });
     });
   }
@@ -84,24 +85,13 @@ class GameBoardState extends State<GameBoard> {
 
                           // game has ended or invalid column clicked!
                           if ( _game.state == null || !validCol ) {
-                            debugPrint("Game over!");
                             return;
                           }
 
-                          // don't go if it's the other guys turn!
-                          if ( _aiPlayer != null && _aiPlayer.player == _game.state ) {
-                            debugPrint("Sorry not your turn.");
-                            return;
-                          }
-
-                          // alright, update the game state.
-                          setState(() {
-                            debugPrint("Dropping piece");
-                            _game.dropPiece(column);
-                          });
-
-                          // if we have AI, it's not the AI turn.
-                          aiTurn();
+                          /* _players.forEach((FourPlayer id, Player player ) {
+                            player.columnClicked(column);
+                          });*/
+                          _players[_game.state].columnClicked(column);
 
                         }
 
@@ -157,7 +147,7 @@ class GameBoardState extends State<GameBoard> {
             onPressed: () {
               setState(() {
                 _game.restart();
-                aiTurn();
+                nextTurn();
               });
             },
             child: Text("Restart")

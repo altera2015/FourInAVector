@@ -1,14 +1,14 @@
 import "dart:async";
 import "four_in_a_vector.dart";
 
-abstract class AIPlayer {
+abstract class Player {
 
   final FourPlayer player;
 
-  AIPlayer( this.player );
+  Player( this.player );
+
+  void columnClicked(int column);
 
   Future<int> makeMove( FourInAVector game );
 
 }
-
-

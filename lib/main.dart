@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'gameboard.dart';
+import 'player.dart';
 import 'randomplayer.dart';
+import 'humanplayer.dart';
 import 'four_in_a_vector.dart';
 
 // https://pub.dartlang.org/packages/spritewidget/versions/0.9.16
@@ -72,9 +74,14 @@ class HomeScreenState extends State<HomeScreen> {
             ListTile (
               title: Text("Two Player"),
               onTap:() {
+
+                Map<FourPlayer, Player> players = Map<FourPlayer, Player>();
+                players[FourPlayer.RED]  = HumanPlayer( FourPlayer.RED );
+                players[FourPlayer.YELLOW]  = HumanPlayer( FourPlayer.YELLOW );
+
                 Navigator.push(
                   context,
-                  new MaterialPageRoute(builder: (context) => GameBoard(title: 'Four in a Vector')),
+                  new MaterialPageRoute(builder: (context) => GameBoard(title: 'Four in a Vector', players: players)),
                 );
               }
             ),
@@ -82,11 +89,13 @@ class HomeScreenState extends State<HomeScreen> {
               title: Text("One Player against AI"),
               onTap: () {
 
-                RandomPlayer player = RandomPlayer( FourPlayer.RED );
+                Map<FourPlayer, Player> players = Map<FourPlayer, Player>();
+                players[FourPlayer.RED]  = RandomPlayer( FourPlayer.RED );
+                players[FourPlayer.YELLOW]  = HumanPlayer( FourPlayer.YELLOW );
 
                 Navigator.push(
                   context,
-                  new MaterialPageRoute(builder: (context) => GameBoard(title: 'Four in a Vector', aiPlayer: player)),
+                  new MaterialPageRoute(builder: (context) => GameBoard(title: 'Four in a Vector', players: players)),
                 );
               }
             )

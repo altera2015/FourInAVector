@@ -1,16 +1,21 @@
-import 'aiplayer.dart';
+import 'player.dart';
 import 'four_in_a_vector.dart';
 import 'dart:math';
 import 'dart:core';
 import 'dart:async';
 
-class RandomPlayer extends AIPlayer {
+class RandomPlayer extends Player {
 
   Random _rand;
 
   RandomPlayer(FourPlayer player) : super(player) {
     DateTime dt = DateTime.now();
     _rand = Random( dt.microsecondsSinceEpoch );
+  }
+
+  @override
+  void columnClicked(int column) {
+
   }
 
   @override
