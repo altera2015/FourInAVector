@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'gameboard.dart';
 import 'player.dart';
 import 'randomplayer.dart';
+import 'minmaxplayer.dart';
 import 'humanplayer.dart';
 import 'four_in_a_vector.dart';
 
@@ -86,7 +87,7 @@ class HomeScreenState extends State<HomeScreen> {
               }
             ),
             ListTile(
-              title: Text("One Player against AI"),
+              title: Text("One Player against AI (Easy)"),
               onTap: () {
 
                 Map<FourPlayer, Player> players = Map<FourPlayer, Player>();
@@ -98,6 +99,34 @@ class HomeScreenState extends State<HomeScreen> {
                   new MaterialPageRoute(builder: (context) => GameBoard(title: 'Four in a Vector', players: players)),
                 );
               }
+            ),
+            ListTile(
+                title: Text("One Player against AI (Medium)"),
+                onTap: () {
+
+                  Map<FourPlayer, Player> players = Map<FourPlayer, Player>();
+                  players[FourPlayer.RED]  = MinMaxPlayer( FourPlayer.RED, 2 );
+                  players[FourPlayer.YELLOW]  = HumanPlayer( FourPlayer.YELLOW );
+
+                  Navigator.push(
+                    context,
+                    new MaterialPageRoute(builder: (context) => GameBoard(title: 'Four in a Vector', players: players)),
+                  );
+                }
+            ),
+            ListTile(
+                title: Text("One Player against AI (Hard)"),
+                onTap: () {
+
+                  Map<FourPlayer, Player> players = Map<FourPlayer, Player>();
+                  players[FourPlayer.RED]  = MinMaxPlayer( FourPlayer.RED, 6 );
+                  players[FourPlayer.YELLOW]  = HumanPlayer( FourPlayer.YELLOW );
+
+                  Navigator.push(
+                    context,
+                    new MaterialPageRoute(builder: (context) => GameBoard(title: 'Four in a Vector', players: players)),
+                  );
+                }
             )
           ]
         )

@@ -54,8 +54,12 @@ class GameBoardState extends State<GameBoard> {
     Future<int> f = _players[_game.state].makeMove(_game);
     f.then((col) {
       setState( (){
-        _game.dropPiece(col);
-        nextTurn();
+        if ( col >= 0 ) {
+          _game.dropPiece(col);
+          if ( _game.state != null ) {
+            nextTurn();
+          }
+        }
       });
     });
   }
@@ -141,7 +145,7 @@ class GameBoardState extends State<GameBoard> {
         child: _buildArena(),
       ),
 
-
+/*
       persistentFooterButtons: <Widget>[
         FlatButton(
             onPressed: () {
@@ -152,7 +156,8 @@ class GameBoardState extends State<GameBoard> {
             },
             child: Text("Restart")
         )
-      ],
+      ],*/
+
     );
   }
 }

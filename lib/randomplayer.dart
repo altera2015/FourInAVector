@@ -1,3 +1,5 @@
+/* This AI player simply picks a random column! Easy to beat. */
+
 import 'player.dart';
 import 'four_in_a_vector.dart';
 import 'dart:math';

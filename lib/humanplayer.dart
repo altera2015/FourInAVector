@@ -1,3 +1,5 @@
+/* This player pick a column by clicking on the top row. */
+
 import 'dart:core';
 import 'dart:async';
 import 'four_in_a_vector.dart';

@@ -42,7 +42,7 @@ class FourInAVector {
 
   // number of items that must appear in a row
   // to win.
-  static const int _COUNT = 4;
+  static const int COUNT = 4;
 
   // Board is a list of chips. Any of the enums or null for empty.
   List<FourPlayer> pieces;
@@ -52,7 +52,18 @@ class FourInAVector {
   List<FourPlayer> cellDecorations;
 
   // Down, Left, Down Left, Up Left.
-  final List<FourDirection> _directions = [ FourDirection(1,0), FourDirection(0,1), FourDirection(1,1), FourDirection(-1,1)];
+  final List<FourDirection> directions = [ FourDirection(1,0), FourDirection(0,1), FourDirection(1,1), FourDirection(-1,1)];
+
+
+  // empty constructor.
+  FourInAVector.copyState(FourInAVector game) {
+    this.rows = game.rows;
+    this.columns = game.columns;
+    state = game.state;
+    pieces = new List<FourPlayer>.from(game.pieces);
+    cellDecorations = new List<FourPlayer>( rows * columns );
+    cellDecorations.fillRange(0, cellDecorations.length, null);
+  }
 
   // constructor.
   FourInAVector( int rows, int columns ) {
@@ -114,7 +125,7 @@ class FourInAVector {
 
   // returns the player ID if there are _COUNT items in a row
   // null otherwise.
-  FourPlayer _countInARow( int row, int column, int rowInc, int colInc) {
+  FourPlayer _checkForCountInARow( int row, int column, int rowInc, int colInc) {
 
     FourPlayer rootState = cellState(row, column);
 
@@ -122,7 +133,7 @@ class FourInAVector {
       return null;
     }
 
-    for (int i=1;i<_COUNT;i++ ) {
+    for (int i=1;i<COUNT;i++ ) {
       if ( cellState(row + i * rowInc, column+i * colInc) != rootState ) {
         return null;
       }
@@ -133,7 +144,7 @@ class FourInAVector {
 
   // fills the cell decoration
   void _fillInARow( int row, int column, int rowInc, int colInc, FourPlayer player) {
-    for (int i=0;i<_COUNT;i++ ) {
+    for (int i=0;i<COUNT;i++ ) {
       _setCellDecorationState(row + i * rowInc, column+i * colInc, player);
     }
   }
@@ -143,9 +154,8 @@ class FourInAVector {
 
     for (int column=0;column<columns;column++){
       for (int row=0;row<rows;row++) {
-
-        _directions.forEach((direction) {
-          FourPlayer w = _countInARow(row, column, direction.rowInc, direction.colInc);
+        directions.forEach((direction) {
+          FourPlayer w = _checkForCountInARow(row, column, direction.rowInc, direction.colInc);
           if (w != null ) {
             _fillInARow(row, column, direction.rowInc, direction.colInc, w);
             winner = w;
@@ -171,30 +181,40 @@ class FourInAVector {
 
   // Drop a piece according to the current player.
   void dropPiece( int column ) {
-
     // update the position with the current player.
     var f = (int row, int column) {
-      if ( _setCellState(row, column, state) ) {
-
+      if (_setCellState(row, column, state)) {
         _checkForWin();
-        if (winner!=null) {
+        if (winner != null) {
           state = null;
         } else {
           state = state == FourPlayer.RED ? FourPlayer.YELLOW : FourPlayer.RED;
+
+          bool slotAvailable = false;
+          for (int column = 0; column < columns; column++) {
+            if (cellState(0, column) == null) {
+              slotAvailable = true;
+            }
+          }
+
+          if (!slotAvailable) {
+            // it's a tie!
+            state = null;
+          }
         }
       }
     };
 
-    for ( int row=0; row < rows; row++) {
+    for (int row = 1; row < rows; row++) {
       // find the first chip in the column.
-      if ( cellState(row, column) != null ) {
-        f(row-1, column);
+      if (cellState(row, column) != null) {
+        f(row - 1, column);
         return;
       }
     }
 
     // if no chips are found place a chip in the last row.
-    f(rows-1, column);
+    f(rows - 1, column);
   }
 
 }
