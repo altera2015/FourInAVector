@@ -5,7 +5,7 @@ import 'dart:async';
 
 class GameBoard extends StatefulWidget {
 
-  AIPlayer aiPlayer;
+  final AIPlayer aiPlayer;
 
   GameBoard({Key key, this.title, this.aiPlayer}) : super(key: key);
 
