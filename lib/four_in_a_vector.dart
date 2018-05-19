@@ -211,6 +211,15 @@ class FourInAVector {
     return cellState(0, column) == null;
   }
 
+  int findFreeRow(int column) {
+    for (int row=rows-1;row>=0;row-- ) {
+      if ( cellState(row, column) == null ) {
+        return row;
+      }
+    }
+    return null;
+  }
+
   void undo() {
 
     // do we have any old moves?
@@ -234,49 +243,36 @@ class FourInAVector {
   // Drop a piece according to the current player.
   bool dropPiece( int column ) {
 
-    if ( !validDrop(column)) {
+    int row = findFreeRow(column);
+    if ( row == null ) {
       return false;
     }
 
-    // update the position with the current player.
-    var f = (int row, int column) {
+    _undoStates.add(UndoState(state, winner, row, column));
 
-      _undoStates.add(UndoState(state, winner, row, column));
+    if (_setCellState(row, column, state)) {
+      _checkForWin();
+      if (winner != null) {
+        state = null;
+      } else {
+        state = state == FourPlayer.RED ? FourPlayer.YELLOW : FourPlayer.RED;
 
-      if (_setCellState(row, column, state)) {
-        _checkForWin();
-        if (winner != null) {
-          state = null;
-        } else {
-          state = state == FourPlayer.RED ? FourPlayer.YELLOW : FourPlayer.RED;
-
-          // check if the board is full.
-          bool slotAvailable = false;
-          for (int column = 0; column < columns; column++) {
-            if (cellState(0, column) == null) {
-              slotAvailable = true;
-            }
-          }
-
-          // board is full and no winner,...
-          // it's a tie!
-          if (!slotAvailable) {
-            state = null;
+        // check if the board is full.
+        bool slotAvailable = false;
+        for (int column = 0; column < columns; column++) {
+          if (cellState(0, column) == null) {
+            slotAvailable = true;
           }
         }
-      }
-      return true;
-    };
 
-    for (int row = 1; row < rows; row++) {
-      // find the first chip in the column.
-      if (cellState(row, column) != null) {
-        return f(row - 1, column);
+        // board is full and no winner,...
+        // it's a tie!
+        if (!slotAvailable) {
+          state = null;
+        }
       }
     }
-
-    // if no chips are found place a chip in the last row.
-    return f(rows - 1, column);
+    return true;
   }
 
 }

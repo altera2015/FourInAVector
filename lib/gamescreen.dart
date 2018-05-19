@@ -37,17 +37,6 @@ class GameScreenState extends State<GameScreen> {
     nextTurn();
   }
 
-  String _playerToAssetName( FourPlayer player ) {
-    switch ( player ) {
-      case FourPlayer.RED:
-        return 'images/red.png';
-      case FourPlayer.YELLOW:
-        return 'images/yellow.png';
-      default:
-        return 'images/white.png';
-    }
-  }
-
   void nextTurn() {
 
     if ( _game.state == null ) {
@@ -69,61 +58,6 @@ class GameScreenState extends State<GameScreen> {
       });
     });
   }
-
-  List<TableRow> _buildArenaWidgets(rows, columns) {
-
-    return new List<TableRow>.generate(
-        rows + 1,
-            (int row) => TableRow(
-            children: List<Container>.generate(
-            columns,
-                (int column) {
-
-              if ( row==0 ) {
-
-                bool validCol = _game.validDrop(column);
-                String assetName = validCol ? _playerToAssetName(_game.state ) : "images/white.png";
-
-                return Container(
-                    color: Color(0xda000000),
-
-                    child: IconButton(
-                        icon: Image.asset( assetName ),
-                        iconSize: 40.0,
-
-
-                        onPressed:() {
-
-                          // game has ended or invalid column clicked!
-                          if ( _game.state == null || !validCol ) {
-                            return;
-                          }
-
-                          _players[_game.state].columnClicked(column);
-
-                        }
-
-                    )
-
-                );
-
-              } else {
-                FourPlayer decoration = _game.cellDecoration(row-1, column);
-                Color c = decoration == null ? Color(0x1f000000) : Color(0x8000ff00);
-                return new Container(
-                    child: Image.asset( _playerToAssetName(_game.cellState(row-1, column))),
-                    color: c
-                );
-              }
-            }
-        )
-    )
-    );
-
-  }
-
-
-
 
   Widget _buildStack() {
     return Padding(

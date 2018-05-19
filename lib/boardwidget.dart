@@ -1,3 +1,4 @@
+import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'four_in_a_vector.dart';
@@ -8,6 +9,13 @@ const Color FrameColorEdges = Color(0xff233b80);
 const Color RedChipColor = Color(0xfff14155);
 const Color YellowChipColor = Color(0xfff1e741);
 
+class DropChip {
+  int column;
+  int row;
+  double y;
+  FourPlayer player;
+  DropChip(this.row, this.column, this.player);
+}
 
 class BoardPainter extends CustomPainter {
 
@@ -15,6 +23,9 @@ class BoardPainter extends CustomPainter {
   int rows;
   int columns;
   FourInAVector game;
+  DropChip dropChip;
+
+
 
   double minPadding = 4.0;
   Color frameColor = FrameColor;
@@ -24,7 +35,7 @@ class BoardPainter extends CustomPainter {
 
   List<Rect> columnRects;
 
-  BoardPainter( this.rows, this.columns, this.game ) {
+  BoardPainter( this.rows, this.columns, this.game, this.dropChip ) {
     columnRects = List<Rect>();
   }
 
@@ -116,6 +127,13 @@ class BoardPainter extends CustomPainter {
     double rowHeight = size.height / ( rows + 1 );
     Size cell = Size(columnWidth, rowHeight);
 
+    if ( dropChip != null ) {
+      Offset o = Offset( columnWidth * dropChip.column, dropChip.y * rowHeight * ( dropChip.row + 1 )  );
+      Rect r = o & cell;
+      drawChip(canvas, r, false, false, _playerToChipColor(dropChip.player));
+    }
+
+
     for (int row = -1; row < rows; row++) {
       for (int column = 0; column < columns; column++) {
 
@@ -128,7 +146,7 @@ class BoardPainter extends CustomPainter {
 
         if (row == -1) {
           if (game.state!=null) {
-            if (game.validDrop(column)) {
+            if (game.validDrop(column) && dropChip == null) {
               drawChip(canvas, cellRect, false, false, _playerToChipColor(game.state));
               columnRects.add(cellRect);
             } else {
@@ -157,7 +175,7 @@ class BoardPainter extends CustomPainter {
       return true;
     }
     lastGameChangeCount = game.changeCount;
-    return false;
+    return true;
   }
 
   @override
@@ -181,10 +199,14 @@ class GameBoard extends StatefulWidget {
 }
 
 
-class GameBoardState extends State<GameBoard> {
+class GameBoardState extends State<GameBoard> with SingleTickerProviderStateMixin {
 
   int _rows;
   int _columns;
+  Animation<double> animation;
+  AnimationController controller;
+  DropChip dropChip;
+
   final FourInAVector game;
   final ColumnTappedCB onTapped;
 
@@ -193,19 +215,56 @@ class GameBoardState extends State<GameBoard> {
     this._rows = game.rows;
   }
 
+  initState() {
+
+    super.initState();
+    controller = new AnimationController(
+        duration: const Duration(milliseconds: 2000), vsync: this);
+    final CurvedAnimation curve = new CurvedAnimation(parent: controller, curve: Curves.bounceOut );
+    animation = new Tween(begin: 0.0, end: 1.0).animate(curve)
+      ..addListener(() {
+        setState(() {
+        });
+      });
+
+    animation.addStatusListener((AnimationStatus status){
+
+      if ( status == AnimationStatus.completed ) {
+
+        if ( onTapped != null ) {
+          onTapped(dropChip.column);
+          dropChip = null;
+        }
+      }
+    });
+  }
+
+  dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
 
-    var bp = BoardPainter(_rows, _columns, game);
+    if ( animation.status == AnimationStatus.forward) {
+      dropChip.y = animation.value;
+    }
+
+    var bp = BoardPainter(_rows, _columns, game, dropChip);
 
     return CustomPaint(
       child: GestureDetector (
         onTapUp: (TapUpDetails d) {
           final RenderBox referenceBox = context.findRenderObject();
           var pos = referenceBox.globalToLocal(d.globalPosition);
-          var col = bp.tapToColumns(pos);
-          if ( onTapped != null ) {
-            onTapped(col);
+          var column = bp.tapToColumns(pos);
+
+          if ( game.validDrop(column) && dropChip==null ) {
+            int row = game.findFreeRow(column);
+            dropChip = DropChip(row, column, game.state);
+            controller.reset();
+            controller.forward();
           }
         },
       ),
