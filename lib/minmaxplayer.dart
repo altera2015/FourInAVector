@@ -14,20 +14,57 @@ class ScoringFourInAVector extends FourInAVector {
 
   ScoringFourInAVector.copyState(FourInAVector game) : super.copyState(game);
 
+  bool onBoard( int row, int column ) {
+    return row >= 0 &&
+      row < rows &&
+      column >= 0 &&
+      column < columns;
+  }
   // give points for each cell on the board give extra points for
   // each connected cell.
   int _countInARow( int row, int column, int rowInc, int colInc) {
 
     FourPlayer rootState = cellState(row, column);
 
+    int value = 1;
+
+    // only give scores for positions that allow
+    // a 4 in a row to happen in the future.
     for (int i=1;i<FourInAVector.COUNT;i++ ) {
-      if ( cellState(row + i * rowInc, column+i * colInc) != rootState ) {
-        return i;
+
+      // calculate the next position
+      int ncol = column + i * colInc;
+      int nrow = row + i * rowInc;
+
+      // is this on the board?
+      if ( !onBoard( nrow, ncol ) ) {
+        return 0;
       }
+
+      FourPlayer cs = cellState(nrow, ncol);
+      if ( cs == rootState ) {
+        value++;
+      } else if ( cs != null ) {
+        // this means this was not an open cell.
+        // this placement should not get a good value.
+        return 0;
+      }
+
     }
 
-    return FourInAVector.COUNT;
+    return value;
   }
+
+  final List<FourDirection> _allDirections = [
+    FourDirection(1,0),
+    FourDirection(1,1),
+    FourDirection(0,1),
+    FourDirection(-1,1),
+    FourDirection(-1,0),
+    FourDirection(-1,-1),
+    FourDirection(0,-1),
+    FourDirection(1,-1),
+  ];
 
 
   // iterate over all the cells and give positive points
@@ -44,14 +81,14 @@ class ScoringFourInAVector extends FourInAVector {
           continue;
         }
 
-        directions.forEach((direction) {
+        _allDirections.forEach((direction) {
 
           int count = _countInARow(row, column, direction.rowInc, direction.colInc);
 
           if ( rootNode == player ) {
-            s += count;
+            s += count*count;
           } else {
-            s -= count;
+            s -= count*count;
           }
 
         });
@@ -214,6 +251,5 @@ class MinMaxPlayer extends Player {
     });
 
   }
-
 
 }
