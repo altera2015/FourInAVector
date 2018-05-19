@@ -54,8 +54,14 @@ class HomeScreen extends StatefulWidget {
 
 class HomeScreenState extends State<HomeScreen> {
 
+  bool playerRedHuman = true;
+  bool playerYellowHuman = true;
+  double playerRedLevel = 0.0;
+  double playerYellowLevel = 0.0;
+
   @override
   Widget build(BuildContext context) {
+
 
     return Scaffold(
       appBar: AppBar(
@@ -71,6 +77,91 @@ class HomeScreenState extends State<HomeScreen> {
               child: Center (
                 child: Text ("Choose your game mode:"),
               )
+            ),
+            Row(
+              children: [
+                Image.asset( "images/red.png" ),
+                Text ( playerRedHuman ? "Human" : "AI" ),
+                Switch(
+                    value: playerRedHuman,
+                    onChanged:(bool v) {
+                      setState( () {
+                        playerRedHuman = v;
+                      });
+                    }
+                ),
+                Slider(
+                  onChanged:(double v) {
+                    setState( () {
+                      playerRedLevel = v;
+                    });
+                  },
+                  value: playerRedLevel,
+                  min: 0.0,
+                  max: 4.0,
+                  divisions: 4,
+                )
+              ]
+            ),
+            Row(
+                children: [
+                  Image.asset( "images/yellow.png" ),
+                  Text ( playerYellowHuman ? "Human" : "AI" ),
+                  Switch(
+                      value: playerYellowHuman,
+                      onChanged:(bool v) {
+                        setState( () {
+                          playerYellowHuman = v;
+                        });
+                      }
+                  ),
+                  Slider(
+                    onChanged:(double v) {
+                      setState( () {
+                        playerYellowLevel = v;
+                        debugPrint("$playerYellowLevel");
+                      });
+                    },
+                    value: playerYellowLevel,
+                    min: 0.0,
+                    max: 4.0,
+                    divisions: 4,
+                  )
+                ]
+            ),
+            RaisedButton(
+              child: Text("Play!"),
+              onPressed: (){
+
+                Map<FourPlayer, Player> players = Map<FourPlayer, Player>();
+                if ( playerRedHuman ) {
+                  players[FourPlayer.RED]  = HumanPlayer( FourPlayer.RED );
+                } else {
+                  if ( playerRedLevel == 0.0 ) {
+                    players[FourPlayer.RED]  = RandomPlayer( FourPlayer.RED );
+                  } else {
+                    int l = playerRedLevel.toInt() * 2;
+                    players[FourPlayer.RED]  = MinMaxPlayer( FourPlayer.RED, l);
+                  }
+                }
+
+                if ( playerYellowHuman ) {
+                  players[FourPlayer.YELLOW]  = HumanPlayer( FourPlayer.YELLOW );
+                } else {
+                  if ( playerYellowLevel == 0.0 ) {
+                    players[FourPlayer.YELLOW]  = RandomPlayer( FourPlayer.YELLOW );
+                  } else {
+                    int l = playerYellowLevel.toInt() * 2;
+                    players[FourPlayer.YELLOW]  = MinMaxPlayer( FourPlayer.YELLOW, l );
+                  }
+                }
+
+                Navigator.push(
+                  context,
+                  new MaterialPageRoute(builder: (context) => GameBoard(title: 'Four in a Vector', players: players)),
+                );
+
+              },
             ),
             ListTile (
               title: Text("Two Player"),
