@@ -121,9 +121,10 @@ class MinMaxPlayer extends Player {
     double v = double.negativeInfinity;
     for (int column=0;column<game.columns;column++){
       if ( game.validDrop(column)) {
-        FourInAVector nextState = ScoringFourInAVector.copyState(game);
-        nextState.dropPiece(column);
-        v = max(v, minValue(nextState, alpha, beta, recursionLevel+1));
+        // FourInAVector nextState = ScoringFourInAVector.copyState(game);
+        game.dropPiece(column);
+        v = max(v, minValue(game, alpha, beta, recursionLevel+1));
+        game.undo();
         if ( v >= beta ) {
           return v;
         }
@@ -146,9 +147,10 @@ class MinMaxPlayer extends Player {
     double v = double.infinity;
     for (int column=0;column<game.columns;column++){
       if ( game.validDrop(column)) {
-        FourInAVector nextState = ScoringFourInAVector.copyState(game);
-        nextState.dropPiece(column);
-        v = min(v, maxValue(nextState, alpha, beta, recursionLevel+1));
+        // FourInAVector nextState = ScoringFourInAVector.copyState(game);
+        game.dropPiece(column);
+        v = min(v, maxValue(game, alpha, beta, recursionLevel+1));
+        game.undo();
         if ( v < alpha ) {
           return v;
         }
@@ -205,7 +207,9 @@ class MinMaxPlayer extends Player {
       if ( game.cellState(game.rows-1, centerColumn ) == null ) {
         return centerColumn;
       }
-      return minMaxDecision(game);
+
+      int result = minMaxDecision(game);
+      return result;
 
     });
 
