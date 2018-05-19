@@ -8,6 +8,7 @@ abstract class Player {
   Player( this.player );
 
   void columnClicked(int column);
+  void cancel();
 
   Future<int> makeMove( FourInAVector game );
 

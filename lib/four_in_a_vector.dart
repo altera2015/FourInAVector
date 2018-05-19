@@ -25,6 +25,14 @@ class FourDirection {
   const FourDirection(this.rowInc, this.colInc);
 }
 
+class UndoState {
+  final FourPlayer state;
+  final FourPlayer winner;
+  final int row;
+  final int column;
+  const UndoState(this.state, this.winner, this.row, this.column);
+}
+
 // The main game class.
 class FourInAVector {
 
@@ -54,6 +62,8 @@ class FourInAVector {
   // Down, Left, Down Left, Up Left.
   final List<FourDirection> directions = [ FourDirection(1,0), FourDirection(0,1), FourDirection(1,1), FourDirection(-1,1)];
 
+  // Undo list.
+  List<UndoState> _undoStates;
 
   // empty constructor.
   FourInAVector.copyState(FourInAVector game) {
@@ -63,6 +73,7 @@ class FourInAVector {
     pieces = new List<FourPlayer>.from(game.pieces);
     cellDecorations = new List<FourPlayer>( rows * columns );
     cellDecorations.fillRange(0, cellDecorations.length, null);
+    _undoStates = new List<UndoState>.from(game._undoStates);
   }
 
   // constructor.
@@ -74,6 +85,7 @@ class FourInAVector {
     pieces.fillRange(0, pieces.length, null);
     cellDecorations = new List<FourPlayer>( rows * columns );
     cellDecorations.fillRange(0, cellDecorations.length, null);
+    _undoStates = new List<UndoState>();
   }
 
   /*
@@ -193,10 +205,37 @@ class FourInAVector {
     return cellState(0, column) == null;
   }
 
+  void undo() {
+
+    // do we have any old moves?
+    if ( _undoStates.length == 0 ) {
+      return;
+    }
+
+    // if we had a winner clear the decorations.
+    if ( winner != null ) {
+      cellDecorations.fillRange(0, pieces.length, null);
+    }
+
+    // set back the old states.
+    UndoState us = _undoStates.removeLast();
+    state = us.state;
+    winner = us.winner;
+    _setCellState(us.row, us.column, null);
+  }
+
   // Drop a piece according to the current player.
-  void dropPiece( int column ) {
+  bool dropPiece( int column ) {
+
+    if ( !validDrop(column)) {
+      return false;
+    }
+
     // update the position with the current player.
     var f = (int row, int column) {
+
+      _undoStates.add(UndoState(state, winner, row, column));
+
       if (_setCellState(row, column, state)) {
         _checkForWin();
         if (winner != null) {
@@ -204,6 +243,7 @@ class FourInAVector {
         } else {
           state = state == FourPlayer.RED ? FourPlayer.YELLOW : FourPlayer.RED;
 
+          // check if the board is full.
           bool slotAvailable = false;
           for (int column = 0; column < columns; column++) {
             if (cellState(0, column) == null) {
@@ -211,24 +251,25 @@ class FourInAVector {
             }
           }
 
+          // board is full and no winner,...
+          // it's a tie!
           if (!slotAvailable) {
-            // it's a tie!
             state = null;
           }
         }
       }
+      return true;
     };
 
     for (int row = 1; row < rows; row++) {
       // find the first chip in the column.
       if (cellState(row, column) != null) {
-        f(row - 1, column);
-        return;
+        return f(row - 1, column);
       }
     }
 
     // if no chips are found place a chip in the last row.
-    f(rows - 1, column);
+    return f(rows - 1, column);
   }
 
 }

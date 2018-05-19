@@ -68,6 +68,7 @@ class ScoringFourInAVector extends FourInAVector {
 class MinMaxPlayer extends Player {
 
   int _maxRecursion;
+  bool _requestCancel;
 
   // we needed a number that is big enough to not occur by additions
   // on the board but small enough so that we can subtract single digits.
@@ -77,11 +78,17 @@ class MinMaxPlayer extends Player {
 
   MinMaxPlayer(FourPlayer player, int maxRecursion) : super(player) {
     _maxRecursion = maxRecursion;
+    _requestCancel = false;
   }
 
   @override
   void columnClicked(int column) {
 
+  }
+
+  @override
+  void cancel() {
+    _requestCancel = true;
   }
 
   double terminalScore( ScoringFourInAVector game ) {
@@ -183,8 +190,15 @@ class MinMaxPlayer extends Player {
   @override
   Future<int> makeMove( FourInAVector game ) {
 
+    _requestCancel = false;
+
     return Future<int>.delayed(const Duration(seconds:1), ()
     {
+
+      if ( _requestCancel ) {
+        return -1;
+      }
+
       // if center bottom cell is not take, take it!
       // otherwise perform minMax algo.
       int centerColumn = (game.columns / 2).floor();

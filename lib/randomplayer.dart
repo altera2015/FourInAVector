@@ -9,10 +9,12 @@ import 'dart:async';
 class RandomPlayer extends Player {
 
   Random _rand;
+  bool _requestCancel;
 
   RandomPlayer(FourPlayer player) : super(player) {
     DateTime dt = DateTime.now();
     _rand = Random( dt.microsecondsSinceEpoch );
+    _requestCancel = false;
   }
 
   @override
@@ -20,11 +22,20 @@ class RandomPlayer extends Player {
 
   }
 
+  @override cancel() {
+    _requestCancel = true;
+  }
+
   @override
   Future<int> makeMove( FourInAVector game ) {
 
+    _requestCancel = false;
     return Future<int>.delayed(const Duration(seconds:1), ()
     {
+
+      if ( _requestCancel ) {
+        return -1;
+      }
 
       int col;
       do

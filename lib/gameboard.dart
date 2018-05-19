@@ -27,6 +27,7 @@ class GameBoard extends StatefulWidget {
 class GameBoardState extends State<GameBoard> {
   FourInAVector _game;
   Map<FourPlayer, Player> _players;
+  StreamSubscription<int> _turnStream;
 
   GameBoardState(int rows, int columns, Map<FourPlayer, Player> players )  {
     _players = players;
@@ -53,7 +54,10 @@ class GameBoardState extends State<GameBoard> {
     }
 
     Future<int> f = _players[_game.state].makeMove(_game);
-    f.then((col) {
+    _turnStream = f.asStream().listen((col){
+
+      _turnStream.cancel();
+      _turnStream = null;
       setState( (){
         if ( col >= 0 ) {
           _game.dropPiece(col);
@@ -93,9 +97,6 @@ class GameBoardState extends State<GameBoard> {
                             return;
                           }
 
-                          /* _players.forEach((FourPlayer id, Player player ) {
-                            player.columnClicked(column);
-                          });*/
                           _players[_game.state].columnClicked(column);
 
                         }
@@ -146,18 +147,22 @@ class GameBoardState extends State<GameBoard> {
         child: _buildArena(),
       ),
 
-/*
+
       persistentFooterButtons: <Widget>[
         FlatButton(
             onPressed: () {
               setState(() {
-                _game.restart();
+                if ( _turnStream != null ) {
+                  _turnStream.cancel();
+                  _turnStream = null;
+                }
+                _game.undo();
                 nextTurn();
               });
             },
-            child: Text("Restart")
+            child: Text("Undo")
         )
-      ],*/
+      ],
 
     );
   }

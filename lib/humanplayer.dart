@@ -19,6 +19,11 @@ class HumanPlayer extends Player {
   }
 
   @override
+  void cancel() {
+
+  }
+
+  @override
   Future<int> makeMove( FourInAVector game ) {
     return _streamController.stream.first;
   }
