@@ -6,8 +6,6 @@ import 'minmaxplayer.dart';
 import 'humanplayer.dart';
 import 'four_in_a_vector.dart';
 
-// https://pub.dartlang.org/packages/spritewidget/versions/0.9.16
-
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -63,77 +61,77 @@ class HomeScreenState extends State<HomeScreen> {
   Widget buildGameTypeCard() {
     return Card(
         child: Padding(
-        padding: new EdgeInsets.all(10.0),
-        child: Column(children: [
-          Padding(
-              padding: new EdgeInsets.all(18.0),
-              child: Center(
-                child: Text(
-                  "Game mode",
-                  textScaleFactor: 1.5,
-                  style: new TextStyle(fontWeight: FontWeight.bold),
-                ),
-              )),
-          Table(
-            children: [
-              TableRow(children: [
-                Center(child: Text("Player Type")),
-                Center(child: Text("AI strength"))
-              ]),
-              TableRow(children: [
-                Row(children: [
-                  Image.asset("images/red.png"),
-                  Switch(
-                      value: playerRedHuman,
-                      onChanged: (bool v) {
-                        setState(() {
-                          playerRedHuman = v;
-                        });
-                      }),
-                  Text(playerRedHuman ? "Human" : "AI"),
-                ]),
-                TableCell(
-                    verticalAlignment: TableCellVerticalAlignment.middle,
-                    child: Slider(
-                        onChanged: (double v) {
-                          setState(() {
-                            playerRedLevel = v;
-                          });
-                        },
-                        value: playerRedLevel,
-                        min: 0.0,
-                        max: 4.0,
-                        divisions: 4))
-              ]),
-              TableRow(children: [
-                Row(children: [
-                  Image.asset("images/yellow.png"),
-                  Switch(
-                      value: playerYellowHuman,
-                      onChanged: (bool v) {
-                        setState(() {
-                          playerYellowHuman = v;
-                        });
-                      }),
-                  Text(playerYellowHuman ? "Human" : "AI"),
-                ]),
-                TableCell(
-                    verticalAlignment: TableCellVerticalAlignment.middle,
-                    child: Slider(
-                      onChanged: (double v) {
-                        setState(() {
-                          playerYellowLevel = v;
-                        });
-                      },
-                      value: playerYellowLevel,
-                      min: 0.0,
-                      max: 4.0,
-                      divisions: 4,
-                    )),
-              ])
-            ],
-          )
-        ])));
+            padding: new EdgeInsets.all(10.0),
+            child: Column(children: [
+              Padding(
+                  padding: new EdgeInsets.all(18.0),
+                  child: Center(
+                    child: Text(
+                      "Game mode",
+                      textScaleFactor: 1.5,
+                      style: new TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  )),
+              Table(
+                children: [
+                  TableRow(children: [
+                    Center(child: Text("Player Type")),
+                    Center(child: Text("AI strength"))
+                  ]),
+                  TableRow(children: [
+                    Row(children: [
+                      Image.asset("images/red.png"),
+                      Switch(
+                          value: playerRedHuman,
+                          onChanged: (bool v) {
+                            setState(() {
+                              playerRedHuman = v;
+                            });
+                          }),
+                      Text(playerRedHuman ? "Human" : "AI"),
+                    ]),
+                    TableCell(
+                        verticalAlignment: TableCellVerticalAlignment.middle,
+                        child: Slider(
+                            onChanged: (double v) {
+                              setState(() {
+                                playerRedLevel = v;
+                              });
+                            },
+                            value: playerRedLevel,
+                            min: 0.0,
+                            max: 4.0,
+                            divisions: 4))
+                  ]),
+                  TableRow(children: [
+                    Row(children: [
+                      Image.asset("images/yellow.png"),
+                      Switch(
+                          value: playerYellowHuman,
+                          onChanged: (bool v) {
+                            setState(() {
+                              playerYellowHuman = v;
+                            });
+                          }),
+                      Text(playerYellowHuman ? "Human" : "AI"),
+                    ]),
+                    TableCell(
+                        verticalAlignment: TableCellVerticalAlignment.middle,
+                        child: Slider(
+                          onChanged: (double v) {
+                            setState(() {
+                              playerYellowLevel = v;
+                            });
+                          },
+                          value: playerYellowLevel,
+                          min: 0.0,
+                          max: 4.0,
+                          divisions: 4,
+                        )),
+                  ])
+                ],
+              )
+            ])));
   }
 
   Widget buildBoardSizeMenu() {
@@ -141,7 +139,6 @@ class HomeScreenState extends State<HomeScreen> {
         child: Padding(
             padding: new EdgeInsets.all(10.0),
             child: Column(children: [
-
               Padding(
                   padding: new EdgeInsets.all(18.0),
                   child: Center(
@@ -151,7 +148,6 @@ class HomeScreenState extends State<HomeScreen> {
                       style: new TextStyle(fontWeight: FontWeight.bold),
                     ),
                   )),
-
               Table(children: [
                 TableRow(children: [
                   TableCell(
@@ -193,19 +189,17 @@ class HomeScreenState extends State<HomeScreen> {
             ])));
   }
 
-  Widget buildMenu(BuildContext context) {
+  Widget buildAdvancedMenu(BuildContext context) {
     return Padding(
         padding: new EdgeInsets.all(10.0),
         child: Column(
-
-
           children: <Widget>[
-
             buildGameTypeCard(),
             buildBoardSizeMenu(),
-
-            Padding(
-                padding: new EdgeInsets.all(10.0),
+        Padding(
+          padding: new EdgeInsets.fromLTRB(5.0, 20.0, 5.0, 5.0),
+          child: AspectRatio(
+              aspectRatio: 6.0,
                 child: RaisedButton(
                   child: Text("Play!"),
                   onPressed: () {
@@ -240,28 +234,105 @@ class HomeScreenState extends State<HomeScreen> {
                       context,
                       new MaterialPageRoute(
                           builder: (context) => GameScreen(
-                              title: 'Four in a Vector', players: players, rows: _rows.toInt(), columns: _columns.toInt())),
+                              title: 'Four in a Vector',
+                              players: players,
+                              rows: _rows.toInt(),
+                              columns: _columns.toInt())),
                     );
                   },
-                )),
+                ))
+        )
+          ],
+        ));
+  }
+
+  Widget buildAdvancedScreen(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          // Here we take the value from the MyHomePage object that was created by
+          // the App.build method, and use it to set our appbar title.
+          title: Text("Advanced Game Options"),
+        ),
+        body: DecoratedBox(
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0xffa7d3f9), Color(0xffd0e6f9)])),
+            child: buildAdvancedMenu(context)));
+  }
+
+  Widget buildMenu(BuildContext context) {
+    return Padding(
+        padding: new EdgeInsets.all(10.0),
+        child: Column(
+          children: <Widget>[
             Padding(
-                padding: new EdgeInsets.all(5.0),
-                child: RaisedButton(
-                  child: Text("Quick Player against AI"),
-                  onPressed: () {
-                    Map<FourPlayer, Player> players = Map<FourPlayer, Player>();
-                    players[FourPlayer.RED] = MinMaxPlayer(FourPlayer.RED, 2);
-                    players[FourPlayer.YELLOW] = HumanPlayer(FourPlayer.YELLOW);
+              padding: new EdgeInsets.all(5.0),
+              child: AspectRatio(
+                  aspectRatio: 6.0,
+                  child: RaisedButton(
+                    child: Text("Quick Play against AI"),
+                    onPressed: () {
+                      Map<FourPlayer, Player> players =
+                          Map<FourPlayer, Player>();
+                      players[FourPlayer.RED] = MinMaxPlayer(FourPlayer.RED, 2);
+                      players[FourPlayer.YELLOW] =
+                          HumanPlayer(FourPlayer.YELLOW);
 
-                    Navigator.push(
-                      context,
-                      new MaterialPageRoute(
-                          builder: (context) => GameScreen(
-                              title: 'Four in a Vector', players: players, rows: _rows.toInt(), columns: _columns.toInt() )),
-                    );
-                  },
-                )),
+                      Navigator.push(
+                        context,
+                        new MaterialPageRoute(
+                            builder: (context) => GameScreen(
+                                title: 'Four in a Vector',
+                                players: players,
+                                rows: 6,
+                                columns: 7)),
+                      );
+                    },
+                  )),
+            ),
+            Padding(
+              padding: new EdgeInsets.all(5.0),
+              child: AspectRatio(
+                  // padding: new EdgeInsets.all(5.0),
+                  aspectRatio: 6.0,
+                  child: RaisedButton(
+                    child: Text("Two Player Game"),
+                    onPressed: () {
+                      Map<FourPlayer, Player> players =
+                          Map<FourPlayer, Player>();
+                      players[FourPlayer.RED] = HumanPlayer(FourPlayer.RED);
+                      players[FourPlayer.YELLOW] =
+                          HumanPlayer(FourPlayer.YELLOW);
 
+                      Navigator.push(
+                        context,
+                        new MaterialPageRoute(
+                            builder: (context) => GameScreen(
+                                title: 'Four in a Vector',
+                                players: players,
+                                rows: 6,
+                                columns: 7)),
+                      );
+                    },
+                  )),
+            ),
+            Padding(
+              padding: new EdgeInsets.fromLTRB(5.0, 20.0, 5.0, 5.0),
+              child: AspectRatio(
+                  aspectRatio: 6.0,
+                  child: RaisedButton(
+                    child: Text("Advanced Game Options"),
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          new MaterialPageRoute(
+                              builder: (context) =>
+                                  buildAdvancedScreen(context)));
+                    },
+                  )),
+            )
           ],
         ));
   }
@@ -269,22 +340,17 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.
           title: Text(widget.title),
         ),
         body: DecoratedBox(
-          decoration: BoxDecoration (
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [ Color(0xffa7d3f9), Color(0xffd0e6f9)]
-            )
-          ),
-          child: buildMenu(context)
-        )
-    );
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0xffa7d3f9), Color(0xffd0e6f9)])),
+            child: buildMenu(context)));
   }
 }

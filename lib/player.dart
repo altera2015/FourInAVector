@@ -12,4 +12,5 @@ abstract class Player {
 
   Future<int> makeMove( FourInAVector game );
 
+
 }

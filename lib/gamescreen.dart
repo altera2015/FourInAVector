@@ -37,19 +37,49 @@ class GameScreenState extends State<GameScreen> {
   }
 
 
+  String _PlayerToString( player ) {
+    switch ( player) {
+      case FourPlayer.RED:
+        return "Red";
+      case FourPlayer.YELLOW:
+        return "Yellow";
+      default:
+        return "";
+    }
+  }
+
   Widget _buildStack() {
+
 
     var gameBoard = GameBoard(
         game: _game,
         players: _players
     );
+    var gameStack;
 
+    if ( _game.winner != null ) {
+      gameStack = Stack(
+        alignment: Alignment.center,
+        children: <Widget>[
+
+          gameBoard,
+          Text( _PlayerToString( _game.winner) + " wins!",
+              style: new TextStyle(fontWeight: FontWeight.bold, fontSize: 50.0, color: Colors.black.withOpacity(1.0)),
+            textAlign: TextAlign.center,
+          ),
+
+        ],
+      );
+
+    } else {
+      gameStack = gameBoard;
+    }
     return Padding(
         padding: new EdgeInsets.all(18.0),
         child: Center(
             child: AspectRatio(
                 aspectRatio: 1.1,
-                child: gameBoard
+                child: gameStack
             )
         )
     );
